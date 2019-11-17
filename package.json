@@ -1,0 +1,20 @@
+{
+  "name": "minbx",
+  "version": "0.0.1",
+  "description": "min mobx",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lawler61/minbx.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lawler61/minbx/issues"
+  },
+  "homepage": "https://github.com/lawler61/minbx#readme"
+}
