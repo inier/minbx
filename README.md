@@ -1,0 +1,2 @@
+# minbx
+min mobx
