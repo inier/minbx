@@ -1,7 +1,6 @@
-import { $mobx } from './const';
-
 export * from './decorators';
-export * from './const';
+
+export const $mobx = Symbol('mobx administration');
 
 export function addHiddenProp(object: any, propName: PropertyKey, value: any) {
   Object.defineProperty(object, propName, {

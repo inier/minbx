@@ -6,17 +6,14 @@ import {
 } from '../utils';
 
 export function set(obj: any, key: any, value?: any): void {
-  if (arguments.length === 2) {
-    const values = key;
-    for (const k in values) set(obj, k, values[k]);
-    return;
-  }
+  if (arguments.length === 2)
+    return Object.entries(key).forEach(([k, v]) => set(obj, k, v));
+
   if (isObservableObject(obj)) {
     const adm = obj[$mobx];
     if (adm.values.get(key)) adm.write(key, value);
     else adm.addObservableProp(key, value);
-  } else if (isObservableArray(obj)) {
-    if (typeof key !== 'number') return;
+  } else if (isObservableArray(obj) && typeof key === 'number') {
     if (key >= obj.length) obj.length = key + 1;
     obj[key] = value;
   } else throw new Error('type error');

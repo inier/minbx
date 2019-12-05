@@ -1,21 +1,20 @@
-import { IObservable } from './observable';
-import { IDerivation, IDerivationState } from './derivation';
+import { IObservable, propagateChanged, reportObserved } from './observable';
+import { IDerivation } from './derivation';
+import { startBatch, endBatch } from './globalstate';
 
 export interface IAtom extends IObservable {
-  reportObserved: () => boolean;
-  reportChanged: () => void;
+  reportObserved(): boolean;
+  reportChanged(): void;
 }
 
 export class Atom implements IAtom {
-  lowestObserverState: IDerivationState;
   observers = new Set<IDerivation>();
   diffValue = 0;
 
   reportObserved() {
-    // console.log('reportObserved');
-    return true;
+    return reportObserved(this);
   }
   reportChanged() {
-    // console.log('reportChanged');
+    propagateChanged(this);
   }
 }

@@ -1,8 +1,10 @@
 import { ObservableValue } from './observablevalue';
 import globalState from '../core/globalstate';
 import { Atom, IAtom } from '../core/atom';
-import { addHiddenProp, $mobx, isPropertyKey, decorator } from '../utils';
+import { addHiddenProp, $mobx, isPropertyKey } from '../utils';
 import { set } from '../api/object-api';
+import { ComputedValue, IComputedValueOptions } from './computedvalue';
+import { extendObservable } from '../api/extendobservable';
 
 export class ObservableObjectAdministration {
   atom: IAtom = new Atom();
@@ -10,7 +12,10 @@ export class ObservableObjectAdministration {
 
   constructor(
     public target: any,
-    public values = new Map<PropertyKey, ObservableValue<any>>(),
+    public values = new Map<
+      PropertyKey,
+      ObservableValue<any> | ComputedValue<any>
+    >(),
   ) {}
 
   read(key: PropertyKey) {
@@ -19,6 +24,8 @@ export class ObservableObjectAdministration {
 
   write(key: PropertyKey, newValue: any) {
     const observable = this.values.get(key);
+    if (observable instanceof ComputedValue) return;
+
     newValue = (observable as any).prepareNewValue(newValue);
     if (newValue !== globalState.UNCHANGED) {
       observable.setNewValue(newValue);
@@ -29,8 +36,14 @@ export class ObservableObjectAdministration {
     const observable = new ObservableValue(newValue);
     this.values.set(propName, observable);
     newValue = (observable as any).value;
-    Object.defineProperty(this.target, propName, generateConfig(propName));
+    Object.defineProperty(this.target, propName, getObservableConfig(propName));
     this.atom.reportChanged();
+  }
+
+  addComputedProp(propName: PropertyKey, options: IComputedValueOptions<any>) {
+    this.values.set(propName, new ComputedValue(options));
+    this.target === options.context &&
+      Object.defineProperty(this.target, propName, getComputedConfig(propName));
   }
 
   has(key: PropertyKey) {
@@ -38,13 +51,16 @@ export class ObservableObjectAdministration {
   }
 }
 
-export function asObservableObject(target: any) {
+export function asObservableObject(
+  target: any,
+): ObservableObjectAdministration {
+  if (Object.prototype.hasOwnProperty.call(target, $mobx)) return target[$mobx];
   const adm = new ObservableObjectAdministration(target, new Map());
   addHiddenProp(target, $mobx, adm);
   return adm;
 }
 
-function generateConfig(propName: PropertyKey) {
+function getObservableConfig(propName: PropertyKey) {
   return {
     configurable: true,
     enumerable: true,
@@ -57,9 +73,20 @@ function generateConfig(propName: PropertyKey) {
   };
 }
 
+function getComputedConfig(propName: PropertyKey) {
+  return {
+    configurable: false,
+    enumerable: false,
+    get() {
+      return this[$mobx].read(propName);
+    },
+    set(_v: any) {},
+  };
+}
+
 export function createObservableObject<T>(props: T): T {
   const proxy = new Proxy({}, objectProxyTraps);
-  return extendObject(proxy, props);
+  return extendObservable(proxy, props);
 }
 
 const objectProxyTraps: ProxyHandler<any> = {
@@ -74,12 +101,3 @@ const objectProxyTraps: ProxyHandler<any> = {
     return true;
   },
 };
-
-function extendObject(target: any, properties: any) {
-  Object.keys(properties).forEach(key => {
-    const descriptor = Object.getOwnPropertyDescriptor(properties, key);
-    const resultDescriptor = decorator(target, key, descriptor);
-    Object.defineProperty(target, key, resultDescriptor);
-  });
-  return target;
-}

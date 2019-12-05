@@ -30,11 +30,14 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: resolve('./index.html'),
-      filename: 'index.html',
+      // filename: 'index.html',
     }),
   ],
   resolve: {
     extensions: ['.ts', '.js'],
+    alias: {
+      mobx: path.join(__dirname, 'node_modules/mobx/lib/mobx.es6.js'),
+    },
   },
   devServer: {
     contentBase: resolve('./dist'),

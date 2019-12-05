@@ -3,17 +3,15 @@ import {
   createObservableArray,
   IObservableArray,
 } from '../types/observablearray';
-import { createObservableObject } from '../types/observableobject';
-import { isPlainObject, isObservable, decorator } from '../utils';
+import {
+  createObservableObject,
+  asObservableObject,
+} from '../types/observableobject';
+import { isPlainObject, isObservable, createPropDecorator } from '../utils';
 
 export interface IObservableFactory {
-  // observable overloads
   (value: number | string | null | undefined | boolean): never; // Nope, not supported, use box
-  (
-    target: Object,
-    key: string | symbol,
-    baseDescriptor?: PropertyDescriptor,
-  ): any; // decorator
+  (target: Object, key: string | symbol, descriptor?: PropertyDescriptor): any; // decorator
   <T = any>(value: T[]): IObservableArray<T>;
   <T extends Object>(value: T): T;
 }
@@ -30,9 +28,10 @@ const observableFactories = {
   },
 };
 
-function createObservable(v: any) {
+function createObservable(v: any, arg2?: any) {
   // @observable someProp;
-  if (typeof arguments[1] === 'string') return decorator.apply(null, arguments);
+  if (typeof arg2 === 'string')
+    return observableDecorator.apply(null, arguments);
 
   if (isObservable(v)) return v;
   if (Array.isArray(v)) return observable.array(v);
@@ -45,4 +44,11 @@ export const observable: IObservableFactory &
 
 Object.keys(observableFactories).forEach(
   name => (observable[name] = observableFactories[name]),
+);
+
+export const observableDecorator = createPropDecorator(
+  (target: any, prop: PropertyKey, descriptor: any, _args: any[]) => {
+    const initialValue = descriptor && descriptor.value;
+    return asObservableObject(target).addObservableProp(prop, initialValue);
+  },
 );
