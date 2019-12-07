@@ -1,4 +1,5 @@
 # minbx
+
 min mobx
 
-to be continued...
+main part of mobx

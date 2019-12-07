@@ -3,7 +3,7 @@ import { observableDecorator } from './observable';
 import { endBatch, startBatch } from '../core/globalstate';
 
 export function extendObservable(target: any, properties: any) {
-  // startBatch();
+  startBatch();
   try {
     Object.keys(properties).forEach(key => {
       const descriptor = Object.getOwnPropertyDescriptor(properties, key);
@@ -15,6 +15,6 @@ export function extendObservable(target: any, properties: any) {
     });
     return target;
   } finally {
-    // endBatch();
+    endBatch();
   }
 }

@@ -1,11 +1,13 @@
 import { IDerivation } from './derivation';
 import { Reaction, runReactions } from './reaction';
 
-const globalState = {
+export const globalState = {
   inBatch: 0,
   UNCHANGED: {},
   trackingDerivation: null as IDerivation,
   pendingReactions: [] as Reaction[],
+  runId: 0,
+  isRunningReactions: false,
 };
 
 export function startBatch() {
@@ -17,5 +19,3 @@ export function endBatch() {
     runReactions();
   }
 }
-
-export default globalState;

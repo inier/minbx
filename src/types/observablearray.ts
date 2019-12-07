@@ -1,6 +1,11 @@
 import { observable } from '../api/observable';
-import { IAtom, Atom } from './../core/atom';
-import { addHiddenProp, $mobx } from '../utils';
+import { Atom } from './../core/atom';
+import {
+  addHiddenProp,
+  $mobx,
+  isOriginArrayFnName,
+  isNumberLike,
+} from '../utils';
 
 export interface IObservableArray<T = any> extends Array<T> {
   spliceWithArray(index: number, deleteCount?: number, newItems?: T[]): T[];
@@ -9,7 +14,7 @@ export interface IObservableArray<T = any> extends Array<T> {
 
 class ObservableArrayAdministration {
   values: any[] = [];
-  atom: IAtom = new Atom();
+  atom = new Atom();
   isObservableArray = true;
 
   getArrayLength() {
@@ -21,17 +26,13 @@ class ObservableArrayAdministration {
     const len = this.values.length;
     if (typeof newLength !== 'number' || newLength < 0 || newLength === len)
       return;
-    else if (newLength > len) {
+    if (newLength > len) {
       const newItems = Array.from({ length: newLength - len });
       this.spliceWithArray(len, 0, newItems);
     } else this.spliceWithArray(newLength, len - newLength);
   }
 
-  spliceWithArray(
-    index = 0,
-    deleteCount?: number,
-    newItems: any[] = [],
-  ): any[] {
+  spliceWithArray(index = 0, deleteCount?: number, newItems?: any[]): any[] {
     const len = this.values.length;
 
     if (index > len) index = len;
@@ -41,8 +42,10 @@ class ObservableArrayAdministration {
     else if (deleteCount == null) deleteCount = 0;
     else deleteCount = Math.max(0, Math.min(deleteCount, len - index));
 
-    newItems = newItems.length ? newItems.map(v => observable(v)) : newItems;
+    newItems =
+      newItems && newItems.length ? newItems.map(v => observable(v)) : [];
     const res = this.values.splice(index, deleteCount, ...newItems);
+
     if (deleteCount !== 0 || newItems.length !== 0) this.atom.reportChanged();
     return res;
   }
@@ -61,18 +64,17 @@ export function createObservableArray<T>(
 const arrayTraps = {
   get(target: any, name: any) {
     if (name === 'length') return target[$mobx].getArrayLength();
-    if (typeof name === 'number') return arrayExtensions.get.call(target, name);
-    if (typeof name === 'string' && !isNaN(name as any))
-      return arrayExtensions.get.call(target, +name);
+    if (isNumberLike(name)) return arrayExtensions.get.call(target, +name);
     if (arrayExtensions.hasOwnProperty(name)) return arrayExtensions[name];
 
-    return target[name];
+    return isOriginArrayFnName(name)
+      ? getRestOriginArrayFn(name, target[$mobx])
+      : target[name];
   },
   set(target: any, name: any, value: any): boolean {
     if (name === 'length') target[$mobx].setArrayLength(value);
-    if (typeof name === 'number') arrayExtensions.set.call(target, name, value);
-    if (typeof name === 'symbol' || isNaN(name)) target[name] = value;
-    else arrayExtensions.set.call(target, +name, value);
+    if (isNumberLike(name)) arrayExtensions.set.call(target, +name, value);
+    else target[name] = value;
 
     return true;
   },
@@ -81,7 +83,22 @@ const arrayTraps = {
 const arrayExtensions = {
   splice(index: number, deleteCount?: number, ...newItems: any[]) {
     const adm: ObservableArrayAdministration = this[$mobx];
+    switch (arguments.length) {
+      case 0:
+        return [];
+      case 1:
+        return adm.spliceWithArray(index);
+      case 2:
+        return adm.spliceWithArray(index, deleteCount);
+    }
     return adm.spliceWithArray(index, deleteCount, newItems);
+  },
+  spliceWithArray(
+    index: number,
+    deleteCount?: number,
+    newItems?: any[],
+  ): any[] {
+    return this[$mobx].spliceWithArray(...arguments);
   },
   push(...items: any[]) {
     const adm: ObservableArrayAdministration = this[$mobx];
@@ -100,23 +117,21 @@ const arrayExtensions = {
     return adm.values.length;
   },
   reverse(): any[] {
-    const clone = (<any>this).slice();
+    const clone = this.slice();
     return clone.reverse.apply(clone, arguments);
   },
   sort(compareFn?: (a: any, b: any) => number): any[] {
-    const clone = (<any>this).slice();
+    const clone = this.slice();
     return clone.sort.apply(clone, arguments);
   },
   toJSON(): any[] {
-    return (this as any).slice();
+    return this.slice();
   },
   get(index: number) {
     const adm: ObservableArrayAdministration = this[$mobx];
-    if (adm && index < adm.values.length) {
-      adm.atom.reportObserved();
-      return adm.values[index];
-    }
-    return undefined;
+    if (index >= adm.values.length) return undefined;
+    adm.atom.reportObserved();
+    return adm.values[index];
   },
   set(index: number, newValue: any) {
     const adm: ObservableArrayAdministration = this[$mobx];
@@ -124,37 +139,29 @@ const arrayExtensions = {
     if (index < values.length) {
       const oldValue = values[index];
       newValue = observable(newValue);
-      const changed = newValue !== oldValue;
-      if (changed) {
+      if (newValue !== oldValue) {
         values[index] = newValue;
         adm.atom.reportChanged();
       }
     } else if (index === values.length) {
       adm.spliceWithArray(index, 0, [newValue]);
-    }
+    } else throw new Error('index error');
   },
 };
 
-[
-  'concat',
-  'every',
-  'filter',
-  'forEach',
-  'indexOf',
-  'join',
-  'lastIndexOf',
-  'map',
-  'reduce',
-  'reduceRight',
-  'slice',
-  'some',
-  'toString',
-  'toLocaleString',
-].forEach(funcName => {
-  arrayExtensions[funcName] = function() {
-    const adm = this[$mobx];
+const fnCache = {};
+
+function getRestOriginArrayFn(
+  name: string,
+  adm: ObservableArrayAdministration,
+) {
+  if (fnCache[name] && fnCache[name].adm === adm) return fnCache[name];
+  function fn() {
     adm.atom.reportObserved();
     const res = adm.values;
-    return res[funcName].apply(res, arguments);
-  };
-});
+    return res[name].apply(res, arguments);
+  }
+  fn.adm = adm;
+  fnCache[name] = fn;
+  return fn;
+}

@@ -4,18 +4,29 @@ import {
   isObservable,
   $mobx,
 } from '../utils';
+import { startBatch, endBatch } from '../core/globalstate';
 
 export function set(obj: any, key: any, value?: any): void {
-  if (arguments.length === 2)
-    return Object.entries(key).forEach(([k, v]) => set(obj, k, v));
+  if (arguments.length === 2) {
+    startBatch();
+    try {
+      Object.entries(key).forEach(([k, v]) => set(obj, k, v));
+    } finally {
+      endBatch();
+    }
+    return;
+  }
 
   if (isObservableObject(obj)) {
     const adm = obj[$mobx];
-    if (adm.values.get(key)) adm.write(key, value);
-    else adm.addObservableProp(key, value);
+    adm.values.get(key)
+      ? adm.write(key, value)
+      : adm.addObservableProp(key, value);
   } else if (isObservableArray(obj) && typeof key === 'number') {
+    startBatch();
     if (key >= obj.length) obj.length = key + 1;
     obj[key] = value;
+    endBatch();
   } else throw new Error('type error');
 }
 

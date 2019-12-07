@@ -10,7 +10,7 @@ import {
 import { isPlainObject, isObservable, createPropDecorator } from '../utils';
 
 export interface IObservableFactory {
-  (value: number | string | null | undefined | boolean): never; // Nope, not supported, use box
+  (value: number | string | null | undefined | boolean): never; // use box
   (target: Object, key: string | symbol, descriptor?: PropertyDescriptor): any; // decorator
   <T = any>(value: T[]): IObservableArray<T>;
   <T extends Object>(value: T): T;
@@ -48,7 +48,11 @@ Object.keys(observableFactories).forEach(
 
 export const observableDecorator = createPropDecorator(
   (target: any, prop: PropertyKey, descriptor: any, _args: any[]) => {
-    const initialValue = descriptor && descriptor.value;
+    const initialValue = descriptor
+      ? descriptor.initializer
+        ? descriptor.initializer.call(target)
+        : descriptor.value
+      : undefined;
     return asObservableObject(target).addObservableProp(prop, initialValue);
   },
 );

@@ -1,13 +1,15 @@
 import { observable } from '../api/observable';
 import { Atom } from '../core/atom';
-import globalState from '../core/globalstate';
+import { globalState } from '../core/globalstate';
 
-export interface IObservableValue<T> {
+interface IObservableValue<T> {
   get(): T;
   set(value: T): void;
 }
 
 export class ObservableValue<T> extends Atom implements IObservableValue<T> {
+  isObservableValue = true;
+
   constructor(private value: T) {
     super();
     this.value = observable(value);
@@ -20,10 +22,8 @@ export class ObservableValue<T> extends Atom implements IObservableValue<T> {
 
   set(newValue: T) {
     newValue = this.prepareNewValue(newValue) as any;
-    if (newValue !== globalState.UNCHANGED) {
-      // const oldValue = this.value;
-      this.setNewValue(newValue);
-    }
+    // const oldValue = this.value;
+    newValue !== globalState.UNCHANGED && this.setNewValue(newValue);
   }
 
   private prepareNewValue(newValue: T): T | {} {
@@ -34,9 +34,5 @@ export class ObservableValue<T> extends Atom implements IObservableValue<T> {
   setNewValue(newValue: T) {
     this.value = newValue;
     this.reportChanged();
-  }
-
-  toJSON() {
-    return this.get();
   }
 }

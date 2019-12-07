@@ -2,6 +2,20 @@ export * from './decorators';
 
 export const $mobx = Symbol('mobx administration');
 
+const arrayProto = Object.getPrototypeOf([]);
+
+export function isOriginArrayFnName(name: string) {
+  if (['length', 'constructor'].includes(name)) return false;
+  return arrayProto.hasOwnProperty(name);
+}
+
+export function isNumberLike(name: any) {
+  return (
+    typeof name === 'number' ||
+    (typeof name === 'string' && !isNaN(name as any))
+  );
+}
+
 export function addHiddenProp(object: any, propName: PropertyKey, value: any) {
   Object.defineProperty(object, propName, {
     enumerable: false,

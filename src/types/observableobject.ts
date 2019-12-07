@@ -1,13 +1,13 @@
 import { ObservableValue } from './observablevalue';
-import globalState from '../core/globalstate';
-import { Atom, IAtom } from '../core/atom';
+import { globalState } from '../core/globalstate';
+import { Atom } from '../core/atom';
 import { addHiddenProp, $mobx, isPropertyKey } from '../utils';
 import { set } from '../api/object-api';
 import { ComputedValue, IComputedValueOptions } from './computedvalue';
 import { extendObservable } from '../api/extendobservable';
 
 export class ObservableObjectAdministration {
-  atom: IAtom = new Atom();
+  atom = new Atom();
   isObservableObject = true;
 
   constructor(
@@ -47,7 +47,7 @@ export class ObservableObjectAdministration {
   }
 
   has(key: PropertyKey) {
-    this.values.has(key);
+    return this.values.has(key);
   }
 }
 
@@ -80,7 +80,7 @@ function getComputedConfig(propName: PropertyKey) {
     get() {
       return this[$mobx].read(propName);
     },
-    set(_v: any) {},
+    // set(v: any) {},
   };
 }
 
@@ -99,5 +99,9 @@ const objectProxyTraps: ProxyHandler<any> = {
     if (!isPropertyKey(name)) return false;
     set(target, name, value);
     return true;
+  },
+  ownKeys(target) {
+    target[$mobx].atom.reportObserved();
+    return Reflect.ownKeys(target);
   },
 };

@@ -1,5 +1,4 @@
-import { observable, computed, autorun } from './src';
-import { observable as o, computed as c } from 'mobx';
+import { observable, computed, autorun, set, has } from './src';
 
 // const a = observable({
 //   a: 1,
@@ -15,31 +14,33 @@ import { observable as o, computed as c } from 'mobx';
 // window.aa = a;
 
 class Store {
-  @observable obj = { p: '1', a: [4, 6] };
-  @observable arr = [1, 4, 6];
+  @observable obj = { a: 1 };
+  @observable arr = [2, 3];
   @observable str = 'hello';
-  @observable bool = false;
-  @observable num = 3;
-
+  @observable bool = true;
+  @observable num = 4;
   @computed get mixed() {
     return store.str + '/' + store.num;
-    // return 12;
+  }
+  @computed get dbl() {
+    return store.mixed + '/dlb';
   }
 }
 
 const store = new Store();
-// console.log(store.mixed);
-window.ss = store;
-// debugger;
 
-autorun(rc => {
-  if (!store.bool) {
-    console.log('auto run:', store.str, store.arr);
-  } else {
-    // store.str = 'change-in';
-    console.log(store.mixed);
-    console.log('auto run2:', store.str, store.bool, store.obj, store.mixed);
-  }
+// autorun(r => {
+//   if (!store.bool) {
+//     console.log('auto', store.str, store.arr);
+//   } else {
+//     // store.str = 'change-in-autorun'; // computed 也依赖 str
+//     console.log('auto2', store.str, store.obj.a, store.mixed);
+//     // console.log('auto2', store.str);
+//   }
+// });
+
+autorun(r => {
+  console.log('auto2', store.str, store.obj.a, store.dbl);
 });
 
-store.bool = true;
+store.str = 'change';

@@ -1,10 +1,12 @@
-import { IObservable, removeObserver, addObserver } from './observable';
-import globalState from './globalstate';
+import { IObservable } from './observable';
+import { globalState } from './globalstate';
 
 export interface IDerivation {
   observing: IObservable[];
   newObserving: IObservable[];
   onBecomeStale(): void;
+  runId: number;
+  isStale?: boolean;
 }
 
 export function trackDerivedFunction<T>(
@@ -12,10 +14,10 @@ export function trackDerivedFunction<T>(
   f: () => T,
   context: any,
 ) {
-  // derivation.runId = ++globalState.runId;
+  derivation.runId = ++globalState.runId;
   const prevTracking = globalState.trackingDerivation;
-  globalState.trackingDerivation = derivation;
-  const result = f.call(context);
+  globalState.trackingDerivation = derivation; // 切分支
+  const result = f.call(context); // computed 为计算完后的值
   globalState.trackingDerivation = prevTracking;
   bindDependencies(derivation);
   return result;
@@ -23,9 +25,7 @@ export function trackDerivedFunction<T>(
 
 function bindDependencies(derivation: IDerivation) {
   const prevObserving = derivation.observing;
-  const observing = (derivation.observing = [
-    ...new Set(derivation.newObserving),
-  ]);
+  const observing = (derivation.observing = derivation.newObserving);
 
   // 新依赖置为 1
   observing.forEach(dep => dep.diffValue === 0 && (dep.diffValue = 1));

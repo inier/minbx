@@ -1,6 +1,7 @@
 import { observable } from './api/observable';
 import { computed } from './api/computed';
-import { autorun } from './api/aoturun';
 import { $mobx } from './utils';
 
-export { observable, computed, autorun, $mobx };
+export * from './api/aoturun';
+export * from './api/object-api';
+export { observable, computed, $mobx };
