@@ -82,7 +82,6 @@ test('autorun-compute', () => {
 });
 
 // observable 被 computed 和 reaction 依赖，同时 computed 也被 reaction 依赖
-// TODO:
 test('autorun-complex1', () => {
   class Store {
     @observable obj = { a: 1 };
@@ -125,21 +124,26 @@ test('autorun-complex2', () => {
     @computed get mixed() {
       return store.str + '/' + store.num;
     }
+    @computed get dbl() {
+      return store.mixed + '/dbl';
+    }
   }
 
   const store = new Store();
   const values = [];
 
   autorun(r => {
-    values.push([store.str, store.obj.a, store.mixed]);
+    values.push([store.str, store.obj.a, store.dbl]);
   });
 
   store.str = 'change';
 
+  // NOTE: 收集依赖没做优化，会多次执行
   expect(values).toEqual([
-    ['hello', 1, 'hello/4'],
-    ['change', 1, 'change/4'],
-    ['change', 1, 'change/4'],
-    ['change', 1, 'change/4'],
+    ['hello', 1, 'hello/4/dbl'],
+    ['change', 1, 'change/4/dbl'],
+    ['change', 1, 'change/4/dbl'],
+    ['change', 1, 'change/4/dbl'],
+    ['change', 1, 'change/4/dbl'],
   ]);
 });

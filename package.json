@@ -1,13 +1,21 @@
 {
   "name": "minbx",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "min mobx",
-  "main": "lib/index.js",
+  "main": "lib/mobx.js",
+  "umd:main": "lib/mobx.umd.js",
+  "module": "lib/mobx.module.js",
+  "browser": {
+    "./lib/mobx.js": "./lib/mobx.js",
+    "./lib/mobx.module.js": "./lib/mobx.module.js"
+  },
+  "typings": "lib/mobx.d.ts",
   "scripts": {
     "start": "webpack-dev-server --hot",
     "test": "jest --verbose",
     "watch": "jest --watch",
-    "build": "rm -rf dist && tsc src/* -t es5 --outDir dist",
+    "build:fast": "rm -rf lib && tsc --pretty",
+    "build": "node scripts/build.js",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "jest": {
@@ -33,9 +41,17 @@
     "type": "git",
     "url": "git+https://github.com/lawler61/minbx.git"
   },
-  "keywords": [],
+  "keywords": [
+    "mobx",
+    "observable",
+    "react",
+    "state management"
+  ],
   "author": "lawler61",
   "license": "ISC",
+  "files": [
+    "lib"
+  ],
   "bugs": {
     "url": "https://github.com/lawler61/minbx/issues"
   },
@@ -48,12 +64,18 @@
     "@types/node": "^12.11.1",
     "awesome-typescript-loader": "^5.2.1",
     "babel-jest": "^24.9.0",
+    "fs-extra": "^8.1.0",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
     "mobx": "^5.15.0",
     "prettier": "^1.18.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
+    "rollup": "^1.27.9",
+    "rollup-plugin-filesize": "^6.2.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-terser": "^5.1.2",
     "ts-jest": "^24.2.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.4",

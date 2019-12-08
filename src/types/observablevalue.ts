@@ -22,7 +22,6 @@ export class ObservableValue<T> extends Atom implements IObservableValue<T> {
 
   set(newValue: T) {
     newValue = this.prepareNewValue(newValue) as any;
-    // const oldValue = this.value;
     newValue !== globalState.UNCHANGED && this.setNewValue(newValue);
   }
 

@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
+    "target": "es6",
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "downlevelIteration": true,
-    "target": "es5",
-    "sourceMap": true,
-    "outDir": "./dist",
+    "sourceMap": false,
+    "outDir": "lib",
     "incremental": true,
     "allowSyntheticDefaultImports": true
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
     "node_modules"
   ]

@@ -26,10 +26,7 @@ export function createPropDecorator(propertyCreator: PropertyCreator) {
 }
 
 function quacksLikeADecorator(args: any[]): boolean {
-  // 类：1
-  // 属性：2
-  // 方法：3
-  // 方法参数：3
+  // 类：1；属性：2；方法：3；方法参数：3
   return (
     ((args.length === 2 || args.length === 3) && typeof args[1] === 'string') ||
     (args.length === 4 && args[3] === true)

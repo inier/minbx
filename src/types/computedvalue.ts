@@ -35,7 +35,6 @@ export class ComputedValue<T>
 
   onBecomeStale() {
     propagateChanged(this);
-    // propagateMaybeChanged(this);
   }
 
   get(): T {

@@ -1,4 +1,4 @@
-import { observable, computed, autorun, set, has } from './src';
+import { observable, computed, autorun } from './src';
 
 // const a = observable({
 //   a: 1,
@@ -23,7 +23,7 @@ class Store {
     return store.str + '/' + store.num;
   }
   @computed get dbl() {
-    return store.mixed + '/dlb';
+    return store.mixed + '/dbl';
   }
 }
 

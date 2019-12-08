@@ -20,12 +20,11 @@ export function reportObserved(observable: IObservable) {
 }
 
 export function propagateChanged(observable: IObservable) {
-  // TODO: 这里剔除了 mobx 的 IDerivationState 状态管理
+  // NOTE:
+  // 这里剔除了 mobx 的 IDerivationState 状态管理
   // 单纯的对 observable 的监听者进行遍历通知
   // 所以在针对含 compute 嵌套依赖的情况下会出现重复收集依赖
   observable.observers.forEach(d => {
     d.onBecomeStale();
   });
 }
-
-// export function propagateMaybeChanged(observable: IObservable) {}

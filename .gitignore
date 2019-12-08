@@ -19,6 +19,9 @@ package-lock.json
 build
 dist
 coverage
+.build*
+lib
 
 # cache
 .cache
+tsconfig.tsbuildinfo
