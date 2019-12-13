@@ -47,3 +47,10 @@ export function isObservableArray(thing: any) {
 export function isPropertyKey(val: any) {
   return ['string', 'number', 'symbol'].includes(typeof val);
 }
+
+export function isForwardRef(thing: any) {
+  if (typeof thing === 'object' && thing !== null && thing.$$typeof) {
+    return thing.$$typeof === Symbol.for('react.forward_ref');
+  }
+  return false;
+}

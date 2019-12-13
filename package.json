@@ -1,6 +1,6 @@
 {
   "name": "minbx",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "min mobx",
   "main": "lib/mobx.js",
   "umd:main": "lib/mobx.umd.js",
@@ -56,12 +56,17 @@
     "url": "https://github.com/lawler61/minbx/issues"
   },
   "homepage": "https://github.com/lawler61/minbx#readme",
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
     "@types/node": "^12.11.1",
+    "@types/react": "^16.9.15",
+    "@types/react-dom": "^16.9.4",
     "awesome-typescript-loader": "^5.2.1",
     "babel-jest": "^24.9.0",
     "fs-extra": "^8.1.0",

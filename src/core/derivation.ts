@@ -44,3 +44,9 @@ function bindDependencies(derivation: IDerivation) {
     }
   });
 }
+
+export function clearObserving(derivation: IDerivation) {
+  const obs = derivation.observing;
+  derivation.observing = [];
+  obs.forEach(dep => dep.observers.delete(derivation));
+}

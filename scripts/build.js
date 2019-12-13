@@ -67,13 +67,14 @@ async function generateBundledModule(inputFile, outputFile, format, production) 
 
     const bundle = await rollup({
         input: inputFile,
+        external: ["react"],
         plugins
     })
 
     await bundle.write({
         file: outputFile,
         format,
-        banner: "/** Minbx, By Lawler61: https://github.com/lawler61 */",
+        banner: "/** Minbx, by lawler61: https://github.com/lawler61 */",
         exports: "named",
         name: format === "umd" ? "mobx" : undefined
     })
