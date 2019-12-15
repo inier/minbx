@@ -6,17 +6,19 @@ mini mobx: main part of mobx, for new learners who diving into the source code
 
 same as using mobx
 
-1. `yarn add minbx`
+1. install: `yarn add minbx`
 
 2. import
 
 ```js
 import { observable, computed, autorun, set, get, has, $mobx } from 'minbx';
 
-import { observer, Observer, useObserver } from 'minbx'; // for react-mobx
+import { observer, Observer, useObserver } from 'minbx'; // for react
 ```
 
 3. example
+
+- normal
 
 ```js
 class Store {
@@ -39,6 +41,14 @@ autorun(r => {
 store.str = 'change';
 ```
 
+- react
+
+```js
+const A = observer(() => <div>observable: {store.num}</div>);
+
+const B = <Observer>{() => <div>Inner Component</div>}</Observer>
+```
+
 ## blog post
 
 - [mobx 源码解读（一）：从零到 observable 一个 object 如何](https://github.com/lawler61/blog/blob/master/js/mobx-source/1.observable-an-object.md)
@@ -51,8 +61,4 @@ store.str = 'change';
 
 - [mobx 源码解读（五）：如虎添翼的 mobx-react](https://github.com/lawler61/blog/blob/master/js/mobx-source/5.mobx-react.md)
 
-## contribute
-
-welcome to pr
-
-**don't forget to star ❤️ ~**
+**don't forget to ❤️**

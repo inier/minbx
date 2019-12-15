@@ -1,6 +1,6 @@
 {
   "name": "minbx",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "min mobx",
   "main": "lib/mobx.js",
   "umd:main": "lib/mobx.umd.js",
@@ -9,7 +9,7 @@
     "./lib/mobx.js": "./lib/mobx.js",
     "./lib/mobx.module.js": "./lib/mobx.module.js"
   },
-  "typings": "lib/mobx.d.ts",
+  "typings": "lib/index.d.ts",
   "scripts": {
     "start": "webpack-dev-server --hot",
     "test": "jest --verbose",
